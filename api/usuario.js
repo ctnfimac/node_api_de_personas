@@ -1,5 +1,8 @@
 
 const Pool = require("pg").Pool;
+// const req = require("request");
+const fetch = require("node-fetch");
+
 
 const pool = new Pool({
     user: "postgres",
@@ -10,6 +13,7 @@ const pool = new Pool({
 });
 
 const obtenerUsuarios = (request, response) => {
+
     pool.query('SELECT * FROM usuario ORDER BY id ASC', (error, results) => {
         if (error) {
             throw error
@@ -29,17 +33,41 @@ const obtenerUsuario = (request, response) => {
     })
 }
 
+const obtenerCoordenadas = async (direccion) => {
+    try {
+        const url = `http://servicios.usig.buenosaires.gob.ar/normalizar/?direccion=${direccion},caba`
+        let resultado = await fetch(url),
+            json = await resultado.json();
+            return json
+    } catch (error) {
+        console.log(error)
+    }
+}
 
-const crearUsuario = (request, response) => {
-    const { nombre } = request.body
-    const consulta = `INSERT INTO usuario(nombre) VALUES('${nombre}') RETURNING *`;
-    console.log(consulta)
-    pool.query(consulta, (error, results) => {
-        if (error) {
-            throw error
-        }
-        response.status(201).send(`Usuario agregado de nombre: ${results.rows[0].nombre}`)
-    })
+
+
+const crearUsuario = async (request, response) => {
+    const { nombre, direccion } = request.body
+
+    try {
+        const { direccionesNormalizadas } = await obtenerCoordenadas(direccion)
+
+        let longitud = parseFloat(direccionesNormalizadas[0].coordenadas.x)
+        let latitud = parseFloat(direccionesNormalizadas[0].coordenadas.y)
+
+        const consulta = `INSERT INTO usuario(nombre,direccion,latitud,longitud) VALUES('${nombre}','${direccion}',${latitud},${longitud}) RETURNING *`;
+        
+        pool.query(consulta, (error, results) => {
+            if (error) {
+                throw error
+            }
+            response.status(201).send(`Usuario agregado de nombre: ${results.rows[0].nombre}`)
+        })
+
+    } catch (error) {
+        console.log(error)
+    }
+
 }
 
 

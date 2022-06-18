@@ -9,7 +9,10 @@
   "author": "Christian Peralta",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.18.1",
-    "pg": "^8.7.3"
+    "node-fetch": "^2.6.7",
+    "pg": "^8.7.3",
+    "request": "^2.88.2"
   }
 }
