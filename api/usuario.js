@@ -83,19 +83,29 @@ const eliminarUsuario = (request, response) => {
 }
 
 
-const actualizarUsuario = (request, response) => {
+const actualizarUsuario = async(request, response) => {
     const id = parseInt(request.params.id)
-    const { nombre } = request.body
-    pool.query(
-        'UPDATE usuario SET nombre = $1 WHERE id = $2',
-        [nombre, id],
-        (error, results) => {
-            if (error) {
-                throw error
+    const { nombre, direccion } = request.body
+    try {
+        const { direccionesNormalizadas } = await obtenerCoordenadas(direccion)
+
+        let longitud = parseFloat(direccionesNormalizadas[0].coordenadas.x)
+        let latitud = parseFloat(direccionesNormalizadas[0].coordenadas.y)
+
+        pool.query(
+            'UPDATE usuario SET nombre = $1, direccion = $2, latitud = $3, longitud = $4 WHERE id = $5',
+            [nombre, direccion, latitud, longitud, id],
+            (error, results) => {
+                if (error) {
+                    throw error
+                }
+                response.status(200).send(`Usuario modificado con Id: ${id}`)
             }
-            response.status(200).send(`Usuario modificado con Id: ${id}`)
-        }
-    )
+        )
+        
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 
