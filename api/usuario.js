@@ -109,10 +109,29 @@ const actualizarUsuario = async(request, response) => {
 }
 
 
+const loginDeUsuario = async (request, response) => {
+    const { nombre, password } = request.body;
+    try {
+        console.log(`Nombre: ${nombre}, Password: ${password}`)
+        pool.query('SELECT nombre FROM administrador WHERE nombre = $1 and contraseña = $2 LIMIT 1',[nombre,password],
+        (error, results)=>{
+            if(error){
+                throw error
+            }
+            // console.log(results.rows)
+            response.status(200).json(results.rows)
+        })
+    }catch(error){
+        console.log(error)
+    }
+}
+
+
 module.exports = {
     obtenerUsuarios,
     obtenerUsuario,
     crearUsuario,
     eliminarUsuario,
-    actualizarUsuario
+    actualizarUsuario,
+    loginDeUsuario
 }

@@ -50,6 +50,10 @@ app.put('/usuario/:id', (request, response) => {
     db.actualizarUsuario(request, response)
 })
 
+app.post('/login', (request, response) => {
+    db.loginDeUsuario(request, response)
+})
+
 app.listen(port, () => {
     console.log(`Corriendo en http://localhost:${port}`)
 })
