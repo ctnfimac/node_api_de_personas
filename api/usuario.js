@@ -1,6 +1,5 @@
 
 const Pool = require("pg").Pool;
-// const req = require("request");
 const fetch = require("node-fetch");
 
 
@@ -44,7 +43,16 @@ const obtenerCoordenadas = async (direccion) => {
     }
 }
 
-
+const obtenerBarrioYComuna = async (x,y) => {
+    try{
+        const url = `https://ws.usig.buenosaires.gob.ar/datos_utiles/?x=${x}&y=${y}`
+        let resultado = await fetch(url);
+        let json = await resultado.json();
+        return json
+    }catch(error){
+        console.log(error)
+    }
+}
 
 const crearUsuario = async (request, response) => {
     const { nombre, direccion } = request.body
@@ -55,8 +63,9 @@ const crearUsuario = async (request, response) => {
         let longitud = parseFloat(direccionesNormalizadas[0].coordenadas.x)
         let latitud = parseFloat(direccionesNormalizadas[0].coordenadas.y)
 
-        const consulta = `INSERT INTO usuario(nombre,direccion,latitud,longitud) VALUES('${nombre}','${direccion}',${latitud},${longitud}) RETURNING *`;
-        
+        let {comuna, barrio} = await obtenerBarrioYComuna(longitud,latitud)
+
+        const consulta = `INSERT INTO usuario(nombre,direccion,latitud,longitud,barrio,comuna) VALUES('${nombre}','${direccion}',${latitud},${longitud},'${barrio}','${comuna}') RETURNING *`;
         pool.query(consulta, (error, results) => {
             if (error) {
                 throw error
@@ -92,9 +101,11 @@ const actualizarUsuario = async(request, response) => {
         let longitud = parseFloat(direccionesNormalizadas[0].coordenadas.x)
         let latitud = parseFloat(direccionesNormalizadas[0].coordenadas.y)
 
+        let { comuna, barrio } = await obtenerBarrioYComuna(longitud, latitud)
+
         pool.query(
-            'UPDATE usuario SET nombre = $1, direccion = $2, latitud = $3, longitud = $4 WHERE id = $5',
-            [nombre, direccion, latitud, longitud, id],
+            'UPDATE usuario SET nombre = $1, direccion = $2, latitud = $3, longitud = $4, comuna = $5, barrio = $6 WHERE id = $7',
+            [nombre, direccion, latitud, longitud, comuna, barrio, id],
             (error, results) => {
                 if (error) {
                     throw error
@@ -112,13 +123,11 @@ const actualizarUsuario = async(request, response) => {
 const loginDeUsuario = async (request, response) => {
     const { nombre, password } = request.body;
     try {
-        console.log(`Nombre: ${nombre}, Password: ${password}`)
         pool.query('SELECT nombre FROM administrador WHERE nombre = $1 and contraseña = $2 LIMIT 1',[nombre,password],
         (error, results)=>{
             if(error){
                 throw error
             }
-            // console.log(results.rows)
             response.status(200).json(results.rows)
         })
     }catch(error){
