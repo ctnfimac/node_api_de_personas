@@ -18,6 +18,9 @@ CREATE TABLE administrador(
     contraseña character varying(50)
 );
 
+ALTER TABLE usuario ADD COLUMN barrio varchar(50);
+ALTER TABLE usuario ADD COLUMN comuna varchar(50);
+
 INSERT INTO usuario(id, nombre, direccion, latitud, longitud)
 VALUES
 (1,'Christian','Uspallata 2272',-34.6372209999999967, -58.3930000000000007),

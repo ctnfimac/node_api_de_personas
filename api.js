@@ -54,6 +54,15 @@ app.post('/login', (request, response) => {
     db.loginDeUsuario(request, response)
 })
 
+app.get('/usuariosPorBarrio', (request,response) => {
+    db.usuariosPorBarrio(request, response)
+})
+
+app.get('/usuariosPorComuna', (request,response) => {
+    db.usuariosPorComuna(request, response)
+})
+
 app.listen(port, () => {
     console.log(`Corriendo en http://localhost:${port}`)
 })
+

@@ -136,11 +136,43 @@ const loginDeUsuario = async (request, response) => {
 }
 
 
+const usuariosPorBarrio = async (request, response) => {
+    try{
+        const consulta = `SELECT barrio, COUNT(*) FROM usuario GROUP BY barrio`;
+        pool.query(consulta, (error, result) => {
+            if (error) {
+                throw error
+            }
+            response.status(200).json(result.rows)
+        })
+    }catch(error){
+        console.log(error)
+    }
+}
+
+
+const usuariosPorComuna = async (request, response) => {
+    try{
+        const consulta = `SELECT comuna, COUNT(*) FROM usuario GROUP BY comuna`;
+        pool.query(consulta, (error, result) => {
+            if (error) {
+                throw error
+            }
+            response.status(200).json(result.rows)
+        })
+    }catch(error){
+        console.log(error)
+    }
+}
+
+
 module.exports = {
     obtenerUsuarios,
     obtenerUsuario,
     crearUsuario,
     eliminarUsuario,
     actualizarUsuario,
-    loginDeUsuario
+    loginDeUsuario,
+    usuariosPorBarrio,
+    usuariosPorComuna
 }
